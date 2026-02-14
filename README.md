@@ -8,3 +8,5 @@ Este repositorio centraliza apuntes, presentaciones, ejercicios, datasets y prá
 - **Contenido:** Apuntes, diapositivas, soluciones, notebooks, datasets y recursos adicionales.
 - **Estructura:** Cada asignatura o módulo tiene su propia carpeta con el material correspondiente.
 - **Uso:** Recurso interno para estudiantes y profesores; respetar derechos de autor y las políticas de la universidad antes de redistribuir.
+
+00
