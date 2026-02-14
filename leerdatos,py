@@ -1,0 +1,107 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Leer el archivo CSV
+df = pd.read_csv('datos_sinteticos.csv')
+# Convertir fecha a datetime
+df['fecha_campana'] = pd.to_datetime(df['fecha_campana'], errors='coerce')
+
+# Análisis básico de la información
+print("=" * 60)
+print("ANÁLISIS DE DATOS - datos_sinteticos.csv")
+print("=" * 60)
+
+# 1. Forma del dataset
+print(f"\n1. DIMENSIONES DEL DATASET:")
+print(f"   Filas: {df.shape[0]}")
+print(f"   Columnas: {df.shape[1]}")
+
+# 2. Nombres de columnas y tipos de datos
+print(f"\n2. COLUMNAS Y TIPOS DE DATOS:")
+print(df.dtypes)
+
+# 3. Primeras filas
+print(f"\n3. PRIMERAS 5 FILAS:")
+print(df.head())
+
+# 4. Información general
+print(f"\n4. INFORMACIÓN GENERAL:")
+print(df.info())
+
+# 5. Estadísticas descriptivas
+print(f"\n5. ESTADÍSTICAS DESCRIPTIVAS:")
+print(df.describe())
+
+# 6. Valores nulos
+print(f"\n6. VALORES NULOS:")
+print(df.isnull().sum())
+
+# 7. Valores duplicados
+print(f"\n7. FILAS DUPLICADAS: {df.duplicated().sum()}")
+
+# 8. Estadísticas por columna numérica
+print(f"\n8. RESUMEN ADICIONAL:")
+for col in df.select_dtypes(include=[np.number]).columns:
+    print(f"\n   {col}:")
+    print(f"   - Mínimo: {df[col].min()}")
+    print(f"   - Máximo: {df[col].max()}")
+    print(f"   - Promedio: {df[col].mean():.2f}")
+    print(f"   - Mediana: {df[col].median():.2f}")
+    print(f"   - Desv. Estándar: {df[col].std():.2f}")
+
+# 9. Visualizaciones
+sns.set(style='whitegrid', palette='muted')
+plt.figure(figsize=(18,12))
+
+# Subplot 1: campañas por plataforma
+plt.subplot(3,2,1)
+sns.countplot(data=df, x='plataforma', order=df['plataforma'].value_counts().index)
+plt.title('Número de campañas por plataforma')
+plt.xticks(rotation=45)
+
+# Subplot 2: campañas por tipo
+plt.subplot(3,2,2)
+sns.countplot(data=df, x='tipo_campana', order=df['tipo_campana'].value_counts().index)
+plt.title('Número de campañas por tipo')
+plt.xticks(rotation=45)
+
+# Subplot 3: impresiones a lo largo del tiempo (mensual)
+plt.subplot(3,2,3)
+if 'fecha_campana' in df.columns:
+    impresiones_mens = df.set_index('fecha_campana').resample('M')['impresiones'].sum()
+    impresiones_mens.plot(marker='o')
+    plt.title('Impresiones mensuales')
+    plt.ylabel('Impresiones')
+else:
+    plt.text(0.5,0.5,'No hay columna fecha_campana', ha='center')
+
+# Subplot 4: impresiones vs clicks (scatter)
+plt.subplot(3,2,4)
+sns.scatterplot(data=df, x='impresiones', y='clicks', hue='plataforma', alpha=0.7)
+plt.title('Impresiones vs Clicks')
+plt.xscale('log')  # opcional para escalas amplias
+plt.xlabel('Impresiones (log)')
+
+# Subplot 5: heatmap correlación
+plt.subplot(3,2,5)
+numeric = df.select_dtypes(include=[np.number])
+corr = numeric.corr()
+sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', cbar_kws={'shrink':0.6})
+plt.title('Mapa de correlación (numérico)')
+
+# Subplot 6: boxplot CPC por plataforma (si existe)
+plt.subplot(3,2,6)
+if 'cpc' in df.columns:
+    sns.boxplot(data=df, x='plataforma', y='cpc')
+    plt.title('Distribución de `cpc` por plataforma')
+    plt.xticks(rotation=45)
+else:
+    plt.text(0.5,0.5,'No hay columna cpc', ha='center')
+
+plt.tight_layout()
+plt.savefig('graficas_analisis.png', dpi=150)
+print("\n✅ Gráficas generadas y guardadas en 'graficas_analisis.png'")
+plt.show()
+
